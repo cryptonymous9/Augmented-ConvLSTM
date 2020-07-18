@@ -1,15 +1,32 @@
-import os
 import numpy as np
 import pickle
-import h5py
+import matplotlib.pyplot as plt
+
+import os
+
 import tensorflow as tf
+from tensorflow import keras
 import tensorflow.keras.backend as K
 import tensorflow.keras.preprocessing as prep
+
 from sklearn.model_selection import train_test_split
+
 from model import AugementedConvLSTM
-import argparse
 import configparser
 
+import h5py
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+DIR = config.get('Paths', 'dir')
+
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
+
+
+def get_list_from_config(strr):
+    req_list = [int(i) for i in strr.split(',')]
+    return req_list
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -21,26 +38,34 @@ DIR_monsoon_observed = config.get('Paths', 'processed_monsoon_obs')
 DIR_non_monsoon_gcm = config.get('Paths', 'processed_non_monsoon_gcm')
 DIR_non_monsoon_observed = config.get('Paths', 'processed_non_monsoon_obs')
 
-min_train_year = config.get('DataOptions', 'min_train_year')
-max_train_year = config.get('DataOptions', 'max_train_year')
-min_test_year = config.get('DataOptions', 'min_test_year')
-max_test_year = config.get('DataOptions', 'max_test_year')
+min_train_year = int(config.get('DataOptions', 'min_train_year'))
+max_train_year = int(config.get('DataOptions', 'max_train_year'))
+min_test_year = int(config.get('DataOptions', 'min_test_year'))
+max_test_year = int(config.get('DataOptions', 'max_test_year'))
 projection_dimensions = config.get('DataOptions', 'projection_dimensions')
 channels = config.get('DataOptions', 'channels')
 
 convlstm_kernels = config.get('ModelParams', 'convlstm_kernels')
+convlstm_kernels = get_list_from_config(convlstm_kernels)
+
 convlstm_kernel_sizes = config.get('ModelParams', 'convlstm_kernel_sizes')
+convlstm_kernel_sizes = get_list_from_config(convlstm_kernel_sizes)
+
 sr_block_kernels = config.get('ModelParams', 'sr_block_kernels')
+sr_block_kernels = get_list_from_config(sr_block_kernels)
+
 sr_block_kernel_sizes = config.get('ModelParams', 'sr_block_kernel_sizes')
-sr_block_depth = config.get('ModelParams', 'sr_block_depth')
-learning_rate_init = config.get('ModelParams', 'learning_rate_init')
-learning_rate_update_factor = config.get('ModelParams', 'learning_rate_update_factor')
-learning_rate_update_step = config.get('ModelParams', 'learning_rate_update_step')
-learning_rate_patience = config.get('ModelParams', 'learning_rate_patience')
-minimum_learning_rate = config.get('ModelParams', 'minimum_learning_rate')
-training_iters = config.get('ModelParams', 'training_iters')
-batch_size = config.get('ModelParams', 'batch_size')
-timesteps = config.get('ModelParams', 'timesteps')
+sr_block_kernel_sizes = get_list_from_config(sr_block_kernel_sizes)
+
+sr_block_depth = int(config.get('ModelParams', 'sr_block_depth'))
+learning_rate_init = float(config.get('ModelParams', 'learning_rate_init'))
+learning_rate_update_factor = float(config.get('ModelParams', 'learning_rate_update_factor'))
+learning_rate_update_step = float(config.get('ModelParams', 'learning_rate_update_step'))
+learning_rate_patience = float(config.get('ModelParams', 'learning_rate_patience'))
+minimum_learning_rate = float(config.get('ModelParams', 'minimum_learning_rate'))
+training_iters = int(config.get('ModelParams', 'training_iters'))
+batch_size = int(config.get('ModelParams', 'batch_size'))
+timesteps = int(config.get('ModelParams', 'timesteps'))
 std_dev_observed=[]
 
 def load_dataset(model_type):
@@ -82,7 +107,7 @@ def set_data(X, Y,):
     std_dev_observed.append(std_observed)
     return X, Y, std_observed
 
-# 182
+
 def data_generator(X,Y):
     total_years = max_test_year - min_train_year + 1
     train_years = max_train_year - min_train_year + 1
@@ -101,8 +126,7 @@ def data_generator(X,Y):
 
     return train_generator, test_generator
 
-
-def root_mean_squared_error(y_true, y_pred):
+    def root_mean_squared_error(y_true, y_pred):
     return K.sqrt(K.mean(K.square(y_pred - y_true)))
 
 def actual_rmse_loss(y_true, y_pred):
@@ -141,8 +165,10 @@ if __name__ == "__main__":
     
     if args.use_gpu:
         os.environ["CUDA_VISIBLE_DEVICES"]="1"
+        print("Using GPU")
     else:
         os.environ["CUDA_VISIBLE_DEVICES"]="-1"
+        print("Using CPU")
 
     model_type = args.model_type 
 
@@ -150,8 +176,8 @@ if __name__ == "__main__":
     X, Y, std_observed = set_data(X,Y)
     train_generator, test_generator = data_generator(X, Y)
     
-    Aug_ConvLSTM_model = AugementedConvLSTM(channels=channels, projection_height=projection_dimensions[0], projection_width=projection_dimensions[1], timesteps=timesteps)
+    Aug_ConvLSTM_model = AugementedConvLSTM
     model = Aug_ConvLSTM_model.model(convlstm_kernels, convlstm_kernel_sizes, sr_block_kernels, sr_block_kernel_sizes, sr_block_depth)
     
     history = train(model, model_type, train_generator, test_generator)
-    model.save_weights(f"epoch_{training_iters}_clstm_{model_type}_prec_weights.h5")
+    model.save_weights(f"epoch_{training_iters}_clstm_{model_type}_prec_weights.h5")    

@@ -1,10 +1,13 @@
 import numpy as np
 import configparser
 
+
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-
+def get_list_from_config(strr):
+    req_list = [int(i) for i in strr.split(',')]
+    return req_list
 
 DIR = config.get('Paths', 'dir')
 DIR_elevation = config.get('Paths', 'elevation')
@@ -22,20 +25,23 @@ DIR_non_monsoon_gcm = config.get('Paths', 'processed_non_monsoon_gcm')
 DIR_non_monsoon_observed = config.get('Paths', 'processed_non_monsoon_obs')
 
 
-gcm_start_index = config.get('DataOptions', 'gcm_start_index')
-observed_start_index = config.get('DataOptions', 'observed_start_index')
-pressure_end_index = config.get('DataOptions', 'pressure_end_index')
-rhum_end_index =  config.get('DataOptions', 'rhum_end_index')
-omega_end_index = config.get('DataOptions', 'omega_end_index')
-uwind_end_index = config.get('DataOptions', 'uwind_end_index')
-vwind_end_index = config.get('DataOptions', 'vwind_end_index')
+gcm_start_index = int(config.get('DataOptions', 'gcm_start_index'))
+observed_start_index = int(config.get('DataOptions', 'observed_start_index'))
+pressure_end_index = int(config.get('DataOptions', 'pressure_end_index'))
+rhum_end_index =  int(config.get('DataOptions', 'rhum_end_index'))
+omega_end_index = int(config.get('DataOptions', 'omega_end_index'))
+uwind_end_index = int(config.get('DataOptions', 'uwind_end_index'))
+vwind_end_index = int(config.get('DataOptions', 'vwind_end_index'))
 projection_dimensions = config.get('DataOptions', 'projection_dimensions')
-channels = config.get('DataOptions', 'channels')
+projection_dimensions = get_list_from_config(projection_dimensions)
 
-def convert_nc_to_numpy():
-    return 0
+channels = int(config.get('DataOptions', 'channels'))
 
 def load_from_numpy():
+    """
+    Loading Numpy arrays pf each Climate Variable
+
+    """
     X = np.load(DIR_gcm + 'xdata.npy' )
     y = np.load(DIR_observed + 'ydata.npy' )
     omega = np.load(DIR_omega + 'omega.npy')
@@ -49,11 +55,12 @@ def load_from_numpy():
 
 def adjust_data(X, y, omega, pressure, rhum, uwnd, vwnd):
     '''
-    GCM and Observed prjections data:
-        1920-2005 -> 1948-2005 (10220:)
-    
-    Auxilliary Climatic Variables: 
-        1948-2018 -> 1948-2005 (: 21170)
+    Default set for India:
+        GCM and Observed prjections data:
+            1920-2005 -> 1948-2005 (10220:)
+        
+        Auxilliary Climatic Variables: 
+            1948-2018 -> 1948-2005 (: 21170)
     '''
     X = X[gcm_start_index:]
     y = y[observed_start_index:]
@@ -66,6 +73,9 @@ def adjust_data(X, y, omega, pressure, rhum, uwnd, vwnd):
 
     
 def combine_data(X, y, omega, pressure, rhum, uwnd, vwnd):
+    """
+    Stacking each Climate Variable across the individual channels.
+    """
     X_final = np.zeros((channels, np.max(X.shape), projection_dimensions[0], projection_dimensions[1]))
     X_final[0,] = X
     X_final[1,] = elev
@@ -79,8 +89,9 @@ def combine_data(X, y, omega, pressure, rhum, uwnd, vwnd):
 
 def split_for_monsoon(X, X_full_ch_last):
     '''
-    Non-Monsoon months -> Jan-April, Nov, Dec
-    Monsoon months -> May-Oct
+    Default set for India:
+        Non-Monsoon months -> Jan-April, Nov, Dec
+        Monsoon months -> May-Oct
 
     '''
     X_low, y_low   = [], [] 
@@ -107,6 +118,9 @@ def split_for_monsoon(X, X_full_ch_last):
 
 
 def split_save_to_numpy(X_low, y_low, X_high, y_high):
+    """
+    Save the processed numpy data to respective folder.
+    """
     np.save( DIR_monsoon_gcm + 'X_low.npy',X_low)
     np.save(DIR_monsoon_observed + 'Y_low.npy',y_low)
     print("Low Precipitation Data Saved!")
@@ -118,7 +132,7 @@ def split_save_to_numpy(X_low, y_low, X_high, y_high):
 
 
 if __name__ == "__main__":
-    convert_nc_to_numpy()
+
     X_r, y_r, omega_r, pressure_r, rhum_r, uwnd_r, vwnd_r, elev = load_from_numpy()
     
     print("Shape of raw GCM X data: ",X_r.shape) 

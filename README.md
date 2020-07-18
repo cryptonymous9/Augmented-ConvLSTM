@@ -1,34 +1,57 @@
 # Augmented Convolutional LSTMs for Generation of High-Resolution Climate Change Projections
 
-The code in this repositoy contains implementation of Statistical Downscaling using an Augmented Convolutional LSTM based architecture.
+The code in this repository contains the implementation of a novel Statistical Downscaling approach using an Augmented Convolutional LSTM based architecture.
 
 ## Augmented Conv LSTM Architecture 
 ![](model_architecture.png)
 
+
+
 ## Dependencies
-The current codebase is entirely written in Python3. The user must the following packages:
+
+The current codebase is entirely written in Python3. 
 * Tensorflow (recommended =1.13)
-* h5py
-* matplotlib
-* ConfigParser
+* Xarray is recommended for processing Climate data. For more details, see [here](http://xarray.pydata.org/en/stable/).
+
+
 
 ## Data
-* The coarse resolution precipitation outputs used, could be obtained from NCAR Community Earth System Model available in the archives of the [Climate Modeling Intercomparison Project](https://esgf-node.llnl.gov/projects/cmip5/). 
-* For the auxilliary climatic variables, we have used Pressure, Relative Humidity, Wind (all 3-components) obtained from the national Centers for Environmental Prediction-National Center for Atmospheric Research [(NCEP-NCAR) global reanalysis project](https://www.esrl.noaa.gov/psd/data/gridded/data.ncep.reanalysis.html). 
-* For topographical elevation information, we have used data from NASA’s [Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/), which is available at 90 meters resolution.
+
+* The coarse resolution precipitation outputs used, can be downloaded from NCAR Community Earth System Model available in the archives of the [Climate Modeling Intercomparison Project](https://esgf-node.llnl.gov/projects/cmip5/). 
+* The auxilliary climatic variables that are utilized in this work includes Pressure, Relative Humidity, Wind (all 3-components: $u$, $v$, and $\rho$ ) which can be downloaded from the national Centers for Environmental Prediction-National Center for Atmospheric Research [(NCEP-NCAR) global reanalysis project](https://www.esrl.noaa.gov/psd/data/gridded/data.ncep.reanalysis.html). 
+* For topographical elevation information of India, we have used data from NASA’s [Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/), which is available at 90 meters resolution.
+
+
 
 ## Usage
->Place all the data mentioned in the above section in their respective folders nested inside the `./data` directory.
 
-### Quick Look 
+>Place all the downloaded data mentioned in the above section in the form of `numpy nd-arrays` in their respective folders nested inside the `./data` directory.
+
+
+
+### Quick Look
+
+Download a sample climate data from [here](https://drive.google.com/file/d/1ca9su8Xl-cxLuyjSCf5o9QidFj6eoOKZ/view?usp=sharing) which consists of 20 consecutive days including all the 7 climatic variables. 
+
+Also, Download the weights of a pre-trained model that has been trained for 500 epochs on monsoon period on India from [here](https://drive.google.com/file/d/1xypEkTLXBGYg2JSmVH-7kVATrPgOLxi1/view?usp=sharing). Place all the files inside `./sample_data` directory. Then run the following:
+
+```shell
+$ python sample_test.py  
+```
+
+
+### Configuration File
+
+`config.ini` provides configuration allowing setting options such file directories, model parameters, and data specification required for the preprocessing of climatic variables in `preprocess_data.py` and model training in `model.py` and `train.py`. 
+
+
+
+### Train File Usage:
+
+After placing all the climate variables in their respective folders.
+
 ```shell
 $ python preprocess_data.py
-$ python train.py  
-```
-### Configuration File
-`config.ini` provides configuration allowing setting options such file directories, model parameters, and data specification required for the preprocessing of climatic variables in `preprocess_data.py` and model training in `model.py` and `train.py`. 
-### Train File Usage:
-```shell
 $ python train.py [--mode] [--model_type] [--batch_size] [--use_gpu]
 ```
 
