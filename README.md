@@ -18,7 +18,6 @@ The current codebase is entirely written in Python3.
 ## Data
 
 * The coarse resolution precipitation outputs used, can be downloaded from NCAR Community Earth System Model available in the archives of the [Climate Modeling Intercomparison Project](https://esgf-node.llnl.gov/projects/cmip5/). 
-* The auxilliary climatic variables that are utilized in this work includes Pressure, Relative Humidity, Wind (all 3-components: $u$, $v$, and $\rho$ ) which can be downloaded from the national Centers for Environmental Prediction-National Center for Atmospheric Research [(NCEP-NCAR) global reanalysis project](https://www.esrl.noaa.gov/psd/data/gridded/data.ncep.reanalysis.html). 
 * For topographical elevation information of India, we have used data from NASA’s [Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/), which is available at 90 meters resolution.
 
 
