@@ -2,7 +2,7 @@
 
 The code in this repository contains the implementation of a novel Statistical Downscaling approach using an Augmented Convolutional LSTM based architecture.
 
-Paper: https://arxiv.org/abs/2009.11279
+Paper: https://ieeexplore.ieee.org/document/9348885
 
 ## Augmented Conv LSTM Architecture 
 ![](model_architecture.png)
